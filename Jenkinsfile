@@ -13,6 +13,9 @@ pipeline {
         stage('Checkout') { 
             steps { checkout scm } 
         }
+        stage('Lint Dockerfile') {
+            steps { sh 'docker run --rm -i hadolint/hadolint < Dockerfile' }
+        }
         stage('Build') {
             steps { sh 'npm install' }
         }
