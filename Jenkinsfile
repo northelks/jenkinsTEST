@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    tools { nodejs 'node' }
 
     environment {
         IMAGE_NAME     = "${env.BRANCH_NAME == 'dev' ? 'nodedev' : 'nodemain'}"
@@ -9,17 +10,14 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps { checkout scm }
+        stage('Checkout') { 
+            steps { checkout scm } 
         }
         stage('Build') {
-            agent { docker { image 'node:7.8.0'; args '--platform=linux/amd64'; reuseNode true } }
             steps { sh 'npm install' }
         }
         stage('Test') {
-            agent { docker { image 'node:7.8.0'; args '--platform=linux/amd64'; reuseNode true } }
-            environment { CI = 'true' }
-            steps { sh 'npm test' }
+            steps { sh 'CI=true npm test' }
         }
         stage('Docker build') {
             steps { sh "docker build --platform=linux/amd64 -t ${IMAGE_NAME}:${IMAGE_TAG} ." }
