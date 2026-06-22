@@ -25,6 +25,17 @@ pipeline {
         stage('Docker build') {
             steps { sh "docker build --platform=linux/amd64 -t ${IMAGE_NAME}:${IMAGE_TAG} ." }
         }
+        stage('Scan vulnerabilities via Trivy') {
+            steps {
+                script {
+                    def report = sh(
+                        script: "trivy image --exit-code 0 --severity HIGH,MEDIUM,LOW --no-progress ${IMAGE_NAME}:${IMAGE_TAG}",
+                        returnStdout: true
+                    ).trim()
+                    echo "Vulnerability Report:\n${report}"
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 sh """
